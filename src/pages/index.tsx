@@ -7,11 +7,20 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
+import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
+  const [input, setInput] = useState("");
   const { user } = useUser();
+  const ctx = api.useContext();
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate()
+    }
+  });
   if (!user) return null;
   return (
     <div className="flex w-full gap-3">
@@ -25,7 +34,12 @@ const CreatePostWizard = () => {
       <input
         placeholder="Type some emoji"
         className="grow bg-transparent outline-none"
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isPosting}
       />
+      <button onClick={() => mutate({ content: input })}>Post</button>
     </div>
   );
 };
@@ -37,7 +51,7 @@ const PostView = (props: PostWithUser) => {
   return (
     <div
       key={post.id}
-      className="flex h-14 w-14 gap-3 rounded-full border-b border-slate-400 p-4 "
+      className="flex gap-3 border-b border-slate-400 p-4 "
     >
       <Image
         src={author.profilePictureUrl}
@@ -53,7 +67,7 @@ const PostView = (props: PostWithUser) => {
             post.createdAt
           ).fromNow()}`}</span>
         </div>
-        <span className="text-xl">{post.content}</span>
+        <span className="text-2xl">{post.content}</span>
       </div>
     </div>
   );
@@ -61,20 +75,22 @@ const PostView = (props: PostWithUser) => {
 
 const Feed = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
-  if (!postsLoading) return <LoadingPage />;
+
+  if (postsLoading) return <LoadingPage />;
+
   if (!data) return <div>Something went wrong</div>;
+
   return (
-    <div className="flex flex-col">
-      {[...data, ...data]?.map((fullPost) => (
+    <div className="w-full h-full flex flex-col">
+      {data.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
-      ))}{" "}
+      ))}
     </div>
   );
 };
 
 const Home: NextPage = () => {
-  const {isLoaded: userLoaded, isSignedIn } = useUser();
-
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
   api.posts.getAll.useQuery();
 
   if (!userLoaded) return <div />;
