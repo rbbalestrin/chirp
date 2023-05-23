@@ -1,9 +1,11 @@
-import { ClerkProvider } from "@clerk/nextjs";
-import type { AppProps } from "next/app";
-import { dark } from "@clerk/themes";
-import "~/styles/globals.css";
+import { type AppType } from "next/app";
 
-function MyApp({ Component, pageProps }: AppProps) {
+import { api } from "~/utils/api";
+import { ClerkProvider } from "@clerk/nextjs";
+import "~/styles/globals.css";
+import { dark } from "@clerk/themes";
+
+const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <ClerkProvider
       {...pageProps}
@@ -11,9 +13,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         baseTheme: dark,
       }}
     >
-      <Component {...pageProps} />
+      <Component {...pageProps} />{" "}
     </ClerkProvider>
   );
-}
+};
 
-export default MyApp;
+export default api.withTRPC(MyApp);
