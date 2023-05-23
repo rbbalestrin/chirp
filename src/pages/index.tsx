@@ -4,6 +4,8 @@ import { SignInButton, useUser } from "@clerk/nextjs";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import dayjs from "dayjs";
+
+import { toast } from "react-hot-toast";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
@@ -18,8 +20,16 @@ const CreatePostWizard = () => {
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setInput("");
-      void ctx.posts.getAll.invalidate()
-    }
+      void ctx.posts.getAll.invalidate();
+    },
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content;
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to post! Please try again later.");
+      }
+    },
   });
   if (!user) return null;
   return (
@@ -49,10 +59,7 @@ type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
-    <div
-      key={post.id}
-      className="flex gap-3 border-b border-slate-400 p-4 "
-    >
+    <div key={post.id} className="flex gap-3 border-b border-slate-400 p-4 ">
       <Image
         src={author.profilePictureUrl}
         className="h-14 w-14 rounded-full"
@@ -81,7 +88,7 @@ const Feed = () => {
   if (!data) return <div>Something went wrong</div>;
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="flex h-full w-full flex-col">
       {data.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
