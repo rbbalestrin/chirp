@@ -11,6 +11,7 @@ import Image from "next/image";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
 import Link from "next/link";
+import { PageLayout } from "~/components/layout";
 
 dayjs.extend(relativeTime);
 
@@ -50,10 +51,10 @@ const CreatePostWizard = () => {
           if (e.key === "Enter") {
             e.preventDefault();
             if (input === "") {
-              mutate({content: input})
+              mutate({ content: input });
             }
           }
-        }}        
+        }}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         disabled={isPosting}
@@ -85,12 +86,16 @@ const PostView = (props: PostWithUser) => {
       />
       <div className="flex flex-col">
         <div className="flex gap-1 text-slate-300">
-          <Link href={`/@${author.username}`}><span>{`@${author.username}`}</span></Link>
+          <Link href={`/@${author.username}`}>
+            <span>{`@${author.username}`}</span>
+          </Link>
           <span className="font-thin">{` • ${dayjs(
             post.createdAt
           ).fromNow()}`}</span>
         </div>
-        <Link href={`/post/${post.id}`}><span className="text-2xl">{post.content}</span></Link>
+        <Link href={`/post/${post.id}`}>
+          <span className="text-2xl">{post.content}</span>
+        </Link>
       </div>
     </div>
   );
@@ -120,21 +125,20 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <main className="flex h-screen justify-center">
-        <div className="h-full w-full border-x border-slate-400 md:max-w-2xl ">
-          <div className="flex border-b border-slate-400 p-4">
-            {" "}
-            {!isSignedIn && (
-              <div className="flex justify-center">
-                {" "}
-                <SignInButton />{" "}
-              </div>
-            )}{" "}
-            {isSignedIn && <CreatePostWizard />}
-          </div>
-          <Feed />
+      {" "}
+      <PageLayout>
+        <div className="flex border-b border-slate-400 p-4">
+          {" "}
+          {!isSignedIn && (
+            <div className="flex justify-center">
+              {" "}
+              <SignInButton />{" "}
+            </div>
+          )}{" "}
+          {isSignedIn && <CreatePostWizard />}
         </div>
-      </main>
+        <Feed />
+      </PageLayout>
     </>
   );
 };
