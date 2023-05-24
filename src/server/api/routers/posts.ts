@@ -1,5 +1,4 @@
 import { clerkClient } from "@clerk/nextjs";
-import type { User } from "@clerk/nextjs/dist/api";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -11,14 +10,8 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { filterUserforClient } from "~/server/helpers/filterUserforClient";
 
-const filterUserforClient = (user: User) => {
-  return {
-    id: user.id,
-    username: user.username,
-    profilePictureUrl: user.profileImageUrl,
-  };
-};
 
 // Create a new ratelimiter, that allows 10 requests per 10 seconds
 const ratelimit = new Ratelimit({
