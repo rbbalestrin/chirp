@@ -11,6 +11,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { filterUserforClient } from "~/server/helpers/filterUserforClient";
+import type { Post } from "@prisma/client";
 
 
 const addUserDataToPosts = async(posts: Post[]) => {
